@@ -35,9 +35,6 @@ class LyricLines(Dataset):
     def __getitem__(self, index):
         return self.input_ids[index]
 
-    def get_tokenizer(self):
-        return self.tokenizer
-
 
 def clean_line(line: str) -> str:
     """
@@ -64,7 +61,7 @@ def preprocess():
     Two options for preprocess: we can 1.) feed our model a series of song lines or 2.) feed our model a series of
     songs themselves. We'll first try feeding it a bunch of song lines.
     """
-    with open('lyrics.txt', 'r', encoding="utf-8") as f:
+    with open('data/lyrics.txt', 'r', encoding="utf-8") as f:
         lines = f.readlines()
     lines = [clean_line(line) for line in lines]
     dataset = LyricLines(lines)

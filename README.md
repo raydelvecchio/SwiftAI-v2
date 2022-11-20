@@ -1,6 +1,6 @@
 # SwiftAI V2!
 This is the second iteration of SwiftAI! The first time, we used a 7-gram model with an RNN to make predictions and
-generate songs. Now, with more NLP knowledge, we can up the ante and make the best model possible.
+generate songs. Now, with more NLP knowledge, we can up the ante and make the best model possible. Uses [GPT2](https://huggingface.co/docs/transformers/model_doc/gpt2#openai-gpt2).
 
 # Improvements on V1
 As you know this project is the second version of my ill-fated SwiftAI V1. I've made the following enhancements on the
@@ -25,5 +25,10 @@ in the future if we choose to train on songs rather than lines.
 Methods and classes used to generate PyTorch dataset from our generated corpus.
 
 # TODOs:
-* fine tune GPT2 and save the model to make predictions
+* add new embeddings (model.resize_embeddings) to model after we instantiate it
+  * Look up docs for Model to see how to do this
+* Train model with metrics to track progress (loss, accuracy, BLEU)
+  * As part of this, we should save model to a file to load up at any other time
+* Create test loop to get accuracy on test set?
+* Load saved model and make predictions based on it (new file separate from train.py)
 * upload to server to host a website for making such predictions
