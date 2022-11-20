@@ -17,15 +17,13 @@ File containing all constants necessary to train the model. Genius secrets/token
 Methods used to download lyric data from Genius. Should all be run locally from this file; methods never called
 externally.
 
+# corpus.py
+Creates our text corpus of Taylor Swift songs. Should only be run once locally after downloading data. May be deprecated
+in the future if we choose to train on songs rather than lines.
+
 # preprocess.py
-Methods used to generate corpus from .json lyrics files. `generate_corpus` should only be run locally for the purpose
-of synthesizing a corpus from each album's lyrics. `preprocess` method is called externally to get data to train/test
-our model, and all other methods support it.
+Methods and classes used to generate PyTorch dataset from our generated corpus.
 
 # TODOs:
-* get train/test labels/dictionary according to GPT2 tokenizer?
-  * This also involves renaming/overriding the `preprocess` method to be `preformat`, since preprocess should
-  return our training data/labels according to GPT2's tokenizer
-* tokenize according to GPT2 tokenizer from huggingface
 * fine tune GPT2 and save the model to make predictions
 * upload to server to host a website for making such predictions

@@ -1,43 +1,34 @@
-import os
-import re
-import json
+from transformers import GPT2Tokenizer
+from torch.utils.data import Dataset
 
 
-def get_json_filenames():
+class LyricLines(Dataset):
     """
-    Returns a list of .json filenames of Taylor Swift lyrics downloaded from Genius. Filters them to ensure only
-    .json files are returned for preprocessing. Does this with os.listdir (list directory) and os.getcwd (get current
-    working directory). Extensible even if we download more lyrics too!
+    Pytorch dataset class for our lines of lyrics. Contains a tokenizer which tokenizes in the style of GPT2 to train.
+    Docs for tokenizer found here:
+    https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.
     """
-    filetype = re.compile('^.*\.(json)$')
-    all_files = os.listdir(os.getcwd())
-    return [file for file in all_files if filetype.match(file)]
+    def __init__(self, lyrics_lines: list, max_len=1024, unk_token='<|unk|>', bos_token='<|startoftext|>',
+                 eos_token='<|newline|>'):
+        self.lines = lyrics_lines
+        self.num_lines = len(self.lines)
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', unk_token=unk_token, bos_token=bos_token,
+                                                       eos_token=eos_token, add_prefix_space=True)
 
+        print("Beginning to tokenize lyric lines data...")
+        self.input_ids = []
+        for line in self.lines:
+            # tokenizes line between beginning of sentence token and end of sentence token
+            self.input_ids.append(self.tokenizer(f'{bos_token} {line} {eos_token}', max_length=max_len)['input_ids'])
 
-def clean_song(song: str) -> str:
-    """
-    Cleans the input song (string). Removes first/last line of the input song from the .json files. Removes first line
-    because it's always formatted as "songname Lyrics", and last line because it has embedded ads for some reason.
-    """
-    return song[song.find('\n') + 1: song.rfind('\n')]
+    def __len__(self):
+        return self.num_lines
 
+    def __getitem__(self, item):
+        return self.input_ids[item]
 
-def generate_corpus():
-    """
-    For all .json files in the /data folder, add all song lyrics into a single .txt file to use as our corpus. UTF-8
-    encoding solves character map encoding errors, since there are some non-text characters in our .json files. Should
-    only be called once, unless we re-download with new data. Meant to be run locally from this file!
-    """
-    album_files = get_json_filenames()
-    with open('lyrics.txt', 'w', encoding="utf-8") as f:
-        for album in album_files:
-            with open(album) as lyr:
-                j = json.load(lyr)
-            tracks = j['tracks']
-            for track in tracks:
-                lyrics = track['song']['lyrics']
-                lyrics = clean_song(lyrics)
-                f.write(lyrics + '\n')
+    def get_tokenizer(self):
+        return self.tokenizer
 
 
 def clean_line(line: str) -> str:
@@ -51,6 +42,8 @@ def clean_line(line: str) -> str:
         line = line.replace(c, "")
     line = line.replace('-', " ")
     line = line.replace('\n\n\n', '\n\n')
+    line = line.replace('\n\n', '\n')
+    line = line.replace('\n', '')
     return line
 
 
@@ -58,13 +51,16 @@ def preprocess():
     """
     Preprocesses our generated .txt file to remove punctuation, parenthesis, unwanted lines (like LiveGet ticket ads),
     and more. Should return our preprocessed data in string format.
+
+    Two options for preprocess: we can 1.) feed our model a series of song lines or 2.) feed our model a series of
+    songs themselves. We'll first try feeding it a bunch of song lines.
     """
     with open('lyrics.txt', 'r', encoding="utf-8") as f:
         lines = f.readlines()
     lines = [clean_line(line) for line in lines]
-    return "".join(lines)
+    dataset = LyricLines(lines)
+    return dataset
 
 
 if __name__ == "__main__":
-    generate_corpus()
-    print(preprocess())
+    preprocess()
