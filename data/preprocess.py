@@ -1,5 +1,6 @@
 from transformers import GPT2Tokenizer
 from torch.utils.data import Dataset
+import torch
 
 
 class LyricLines(Dataset):
@@ -7,25 +8,32 @@ class LyricLines(Dataset):
     Pytorch dataset class for our lines of lyrics. Contains a tokenizer which tokenizes in the style of GPT2 to train.
     Docs for tokenizer found here:
     https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.
+    Default max length per line of 32 words.
     """
-    def __init__(self, lyrics_lines: list, max_len=1024, unk_token='<|unk|>', bos_token='<|startoftext|>',
-                 eos_token='<|newline|>'):
+
+    def __init__(self, lyrics_lines: list, max_len=32, unk_token='<|unk|>', bos_token='<|startoftext|>',
+                 eos_token='<|newline|>', pad_token='<|pad|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', unk_token=unk_token, bos_token=bos_token,
-                                                       eos_token=eos_token, add_prefix_space=True)
+                                                       eos_token=eos_token, pad_token=pad_token, add_prefix_space=True)
 
-        print("Beginning to tokenize lyric lines data...")
+        print("Tokenizing lyric lines data...")
         self.input_ids = []
         for line in self.lines:
             # tokenizes line between beginning of sentence token and end of sentence token
-            self.input_ids.append(self.tokenizer(f'{bos_token} {line} {eos_token}', max_length=max_len)['input_ids'])
+            line_bos_eos = f'{bos_token} {line} {eos_token}'
+            # pads all sentences to same length (max length of line)
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length')['input_ids']
+            # converts tokens to a tensor and pads to list of line ids
+            self.input_ids.append(torch.Tensor(line_tokens))
+        print("Tokenized!")
 
     def __len__(self):
         return self.num_lines
 
-    def __getitem__(self, item):
-        return self.input_ids[item]
+    def __getitem__(self, index):
+        return self.input_ids[index]
 
     def get_tokenizer(self):
         return self.tokenizer
@@ -44,6 +52,7 @@ def clean_line(line: str) -> str:
     line = line.replace('\n\n\n', '\n\n')
     line = line.replace('\n\n', '\n')
     line = line.replace('\n', '')
+    line = line.lower()
     return line
 
 
