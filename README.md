@@ -30,6 +30,7 @@ in the future if we choose to train on songs rather than lines.
 Methods and classes used to generate PyTorch dataset from our generated corpus.
 
 # TODOs:
+* in our dataset, we could get mask for what we padded to our sentence?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
   * As part of this, we should save model to a file to load up at any other time
 * Load saved model and make predictions based on it (new file separate from train.py)

@@ -11,7 +11,7 @@ class LyricLines(Dataset):
     Default max length per line of 32 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=32, unk_token='<|unk|>', bos_token='<|start|>',
+    def __init__(self, lyrics_lines: list, max_len=20, unk_token='<|unk|>', bos_token='<|start|>',
                  eos_token='<|newline|>', pad_token='<|pad|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
@@ -53,7 +53,7 @@ def clean_line(line: str) -> str:
     return line
 
 
-def preprocess():
+def preprocess_and_get_dataset() -> Dataset:
     """
     Preprocesses our generated .txt file to remove punctuation, parenthesis, unwanted lines (like LiveGet ticket ads),
     and more. Returns Dataset object containing our lyric lines!
