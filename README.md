@@ -18,11 +18,11 @@ used the following command: `pip3 install torch torchvision torchaudio --extra-i
 # constants.py
 File containing all constants necessary to train the model. Genius secrets/tokens stored as environment variables.
 
-# download_data.py
+# data/download_data.py
 Methods used to download lyric data from Genius. Should all be run locally from this file; methods never called
 externally.
 
-# corpus.py
+# data/corpus.py
 Creates our text corpus of Taylor Swift songs. Should only be run once locally after downloading data. May be deprecated
 in the future if we choose to train on songs rather than lines.
 

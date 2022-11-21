@@ -45,6 +45,16 @@ class SwiftAITrainer:
                                                                             num_cycles=lr_cycles)
         print("SwiftAITrainer ready to train!")
 
+    def save_model(self):
+        """
+        Saves both model weights and model object to reload later at any time we want.
+        Docs: https://pytorch.org/tutorials/beginner/basics/saveloadrun_tutorial.html#save-and-load-the-model.
+        The folder "saved_vars" is in the gitignore because our model/weights are massive (370 MB of numbers)!
+        """
+        torch.save(self.model.state_dict(), 'saved_vars/swiftai_weights.pth')
+        torch.save(self.model, 'saved_vars/swiftai_model.pth')
+
 
 if __name__ == "__main__":
     trainer = SwiftAITrainer()
+    trainer.save_model()
