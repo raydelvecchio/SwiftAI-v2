@@ -56,12 +56,11 @@ class SwiftAITrainer:
         torch.save(self.model, 'saved_vars/swiftai_model.pth')
 
     def train(self):
-        self.model.cuda(device=self.device)
-        self.model.to(self.device)
+        self.model.cuda()
+        self.model.train(mode=True)
 
         for epoch in range(self.epochs):
             print(f'Training Epoch {epoch + 1}...')
-            self.model.train(mode=True)
             for batch in self.train_loader:
                 # inputs and labels are the same since we're using GPT2LMHead Model, which creates labels from inputs
                 inputs = batch.cuda().to(self.device).long()

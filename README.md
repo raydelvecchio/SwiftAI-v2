@@ -29,6 +29,13 @@ in the future if we choose to train on songs rather than lines.
 # preprocess.py
 Methods and classes used to generate PyTorch dataset from our generated corpus.
 
+# ERRORS and FIXES
+* model.forward() input cannot be a Tensor
+  * Had to convert input and labels to Long datatype before passing into model.forward()
+* CUDA Not Working, receiving `philox_cuda_state for an unexpected CUDA generator used during capture. In regions captured by CUDA graphs, you may only use the default CUDA RNG generator on the device that's current when capture begins. If you need a non-default (user-supplied) generator, or a generator on another device, please file an issue` error when calling forward pass in train loop
+  * Could try running on CPU instead? Or look up how to properly set up CUDA?
+  * Could it be the tokens we added that's throwing this off?
+
 # TODOs:
 * in our dataset, we could get mask for what we padded to our sentence?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
