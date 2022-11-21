@@ -10,6 +10,11 @@ first version, listed here:
 * Code improvements to make it cleaner, easier to read, and more efficient
 * Huggingface/Pytorch instead of Tensorflow
 
+# Notes on Running and Installation
+This codebase, specifically when training the model, requires CUDA (and Pytorch CUDA). You can check your CUDA version
+with `nvcc --version`. You can then check how to install Pytorch CUDA [here](https://pytorch.org/get-started/locally/). I 
+used the following command: `pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu117`.
+
 # constants.py
 File containing all constants necessary to train the model. Genius secrets/tokens stored as environment variables.
 
@@ -25,10 +30,7 @@ in the future if we choose to train on songs rather than lines.
 Methods and classes used to generate PyTorch dataset from our generated corpus.
 
 # TODOs:
-* add new embeddings (model.resize_embeddings) to model after we instantiate it
-  * Look up docs for Model to see how to do this
 * Train model with metrics to track progress (loss, accuracy, BLEU)
   * As part of this, we should save model to a file to load up at any other time
-* Create test loop to get accuracy on test set?
 * Load saved model and make predictions based on it (new file separate from train.py)
 * upload to server to host a website for making such predictions

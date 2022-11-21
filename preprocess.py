@@ -1,5 +1,5 @@
 from transformers import GPT2Tokenizer
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader, random_split
 import torch
 
 
@@ -11,7 +11,7 @@ class LyricLines(Dataset):
     Default max length per line of 32 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=32, unk_token='<|unk|>', bos_token='<|startoftext|>',
+    def __init__(self, lyrics_lines: list, max_len=32, unk_token='<|unk|>', bos_token='<|start|>',
                  eos_token='<|newline|>', pad_token='<|pad|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
@@ -56,7 +56,7 @@ def clean_line(line: str) -> str:
 def preprocess():
     """
     Preprocesses our generated .txt file to remove punctuation, parenthesis, unwanted lines (like LiveGet ticket ads),
-    and more. Should return our preprocessed data in string format.
+    and more. Returns Dataset object containing our lyric lines!
 
     Two options for preprocess: we can 1.) feed our model a series of song lines or 2.) feed our model a series of
     songs themselves. We'll first try feeding it a bunch of song lines.
@@ -66,7 +66,3 @@ def preprocess():
     lines = [clean_line(line) for line in lines]
     dataset = LyricLines(lines)
     return dataset
-
-
-if __name__ == "__main__":
-    preprocess()
