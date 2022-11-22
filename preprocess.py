@@ -11,12 +11,17 @@ class LyricLines(Dataset):
     Default max length per line of 20 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=20, unk_token='<|unk|>', bos_token='<|start|>',
-                 eos_token='<|newline|>', pad_token='<|pad|>'):
+    def __init__(self, lyrics_lines: list, max_len=20, pad_token='<|pad|>', bos_token='<|startoftext|>',
+                 eos_token='<|endoftext|>', unk_token='<|unk|>'):
+
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', unk_token=unk_token, bos_token=bos_token,
-                                                       eos_token=eos_token, pad_token=pad_token, add_prefix_space=True)
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        special_tokens = {'pad_token': pad_token,
+                          'bos_token': bos_token,
+                          'eos_token': eos_token,
+                          'unk_token': unk_token}
+        self.tokenizer.add_special_tokens(special_tokens)
 
         print("Tokenizing lyric lines data...")
         self.input_ids = []
@@ -24,8 +29,7 @@ class LyricLines(Dataset):
             # tokenizes line between beginning of sentence token and end of sentence token
             line_bos_eos = f'{bos_token} {line} {eos_token}'
             # pads all sentences to same length (max length of line)
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length',
-                                         return_token_type_ids=False)['input_ids']
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length')['input_ids']
             # converts tokens to a tensor and pads to list of line ids
             self.input_ids.append(torch.Tensor(line_tokens))
         print("Tokenized!")
@@ -54,10 +58,10 @@ def clean_line(line: str) -> str:
     return line
 
 
-def preprocess_and_get_dataset() -> Dataset:
+def preprocess_get_dataset_and_tokenizer() -> (Dataset, GPT2Tokenizer):
     """
     Preprocesses our generated .txt file to remove punctuation, parenthesis, unwanted lines (like LiveGet ticket ads),
-    and more. Returns Dataset object containing our lyric lines!
+    and more. Returns Dataset object containing our lyric lines, and tokenizer object to access tokenizations.
 
     Two options for preprocess: we can 1.) feed our model a series of song lines or 2.) feed our model a series of
     songs themselves. We'll first try feeding it a bunch of song lines.
@@ -66,4 +70,4 @@ def preprocess_and_get_dataset() -> Dataset:
         lines = f.readlines()
     lines = [clean_line(line) for line in lines]
     dataset = LyricLines(lines)
-    return dataset
+    return dataset, dataset.tokenizer

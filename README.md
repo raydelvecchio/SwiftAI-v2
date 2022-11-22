@@ -44,6 +44,11 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
   * Ended up solving this by adding `generator=torch.Generator(device="cuda")` to `random_split()`, and adding `torch.set_default_tensor_type(torch.cuda.FloatTensor)` to the top of my `__init__()` method in the trainer class.
 * CUDA Cannot be initialized, receiving `RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling 'cublasCreate(handle)'` error on train loop
   * This is probably because of my tokenizer being expanded to support special characters; I should do away with this?
+  * Try running this on CPU to figure out the error and then switch back to GPU?
+  * Best lead: [https://github.com/huggingface/transformers/issues/6263](https://github.com/huggingface/transformers/issues/6263)
+* `IndexError: index out of range in self`
+  * Fixed by adding `self.tokenizer.add_special_tokens(DICT)` line in preprocess.py Dataset class
+  * Also added `self.model.resize_token_embeddings(len(tokenizer))` in SwiftAITrainer class to account for new tokens
 
 # TODOs:
 * in our dataset, we could get mask for what we padded to our sentence?
