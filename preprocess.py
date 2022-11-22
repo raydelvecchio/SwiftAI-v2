@@ -16,7 +16,7 @@ class LyricLines(Dataset):
 
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', add_prefix_space=True)
         special_tokens = {'pad_token': pad_token,
                           'bos_token': bos_token,
                           'eos_token': eos_token,
@@ -29,7 +29,8 @@ class LyricLines(Dataset):
             # tokenizes line between beginning of sentence token and end of sentence token
             line_bos_eos = f'{bos_token} {line} {eos_token}'
             # pads all sentences to same length (max length of line)
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length')['input_ids']
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length',
+                                         return_token_type_ids=False)['input_ids']
             # converts tokens to a tensor and pads to list of line ids
             self.input_ids.append(torch.Tensor(line_tokens))
         print("Tokenized!")

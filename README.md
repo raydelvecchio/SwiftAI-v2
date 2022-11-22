@@ -37,21 +37,25 @@ for Pytorch training, then uses them to fine tune the GPT2 model.
 Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
 
 # ERRORS and FIXES
-* model.forward() input cannot be a Tensor
+* Train loop: model.forward() input cannot be a Tensor
   * Had to convert input and labels to Long datatype before passing into model.forward()
-* CUDA Not Working, receiving `philox_cuda_state for an unexpected CUDA generator used during capture. In regions captured by CUDA graphs, you may only use the default CUDA RNG generator on the device that's current when capture begins. If you need a non-default (user-supplied) generator, or a generator on another device, please file an issue` error when calling forward pass in train loop
+* Train loop: CUDA Not Working, receiving `philox_cuda_state for an unexpected CUDA generator used during capture. In regions captured by CUDA graphs, you may only use the default CUDA RNG generator on the device that's current when capture begins. If you need a non-default (user-supplied) generator, or a generator on another device, please file an issue` error when calling forward pass in train loop
   * Solved this by adding `generator=torch.Generator(device="cuda")` to DataLoader instantiation, but now I get `RuntimeError: Expected a 'cpu' device type for generator but found 'cuda'` error
   * Ended up solving this by adding `generator=torch.Generator(device="cuda")` to `random_split()`, and adding `torch.set_default_tensor_type(torch.cuda.FloatTensor)` to the top of my `__init__()` method in the trainer class.
-* CUDA Cannot be initialized, receiving `RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling 'cublasCreate(handle)'` error on train loop
+* Train loop: CUDA Cannot be initialized, receiving `RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling 'cublasCreate(handle)'` error on train loop
   * This is probably because of my tokenizer being expanded to support special characters; I should do away with this?
   * Try running this on CPU to figure out the error and then switch back to GPU?
   * Best lead: [https://github.com/huggingface/transformers/issues/6263](https://github.com/huggingface/transformers/issues/6263)
-* `IndexError: index out of range in self`
+* Train loop: `IndexError: index out of range in self`
+  * Only happened when running on CPU, not GPU
   * Fixed by adding `self.tokenizer.add_special_tokens(DICT)` line in preprocess.py Dataset class
   * Also added `self.model.resize_token_embeddings(len(tokenizer))` in SwiftAITrainer class to account for new tokens
+* Train loop with batch size >1: `RuntimeError: stack expects each tensor to be equal size, but got [20] at entry 0 and [22] at entry 7`
+  * Does not occur when batch size is = 1; model trains in this case
+  * Seems like the last tensor has some overflow from our max limit of 20?
 
 # TODOs:
-* in our dataset, we could get mask for what we padded to our sentence?
+* in our dataset, we could get mask for what we padded to our sentence, then remove based on that?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
   * As part of this, we should save model to a file to load up at any other time
 * Load saved model and make predictions based on it (new file separate from train.py)
