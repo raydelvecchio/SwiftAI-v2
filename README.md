@@ -40,8 +40,10 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
 * model.forward() input cannot be a Tensor
   * Had to convert input and labels to Long datatype before passing into model.forward()
 * CUDA Not Working, receiving `philox_cuda_state for an unexpected CUDA generator used during capture. In regions captured by CUDA graphs, you may only use the default CUDA RNG generator on the device that's current when capture begins. If you need a non-default (user-supplied) generator, or a generator on another device, please file an issue` error when calling forward pass in train loop
-  * Could try running on CPU instead? Or look up how to properly set up CUDA?
-  * Could it be the tokens we added that's throwing this off?
+  * Solved this by adding `generator=torch.Generator(device="cuda")` to DataLoader instantiation, but now I get `RuntimeError: Expected a 'cpu' device type for generator but found 'cuda'` error
+  * Ended up solving this by adding `generator=torch.Generator(device="cuda")` to `random_split()`, and adding `torch.set_default_tensor_type(torch.cuda.FloatTensor)` to the top of my `__init__()` method in the trainer class.
+* CUDA Cannot be initialized, receiving `RuntimeError: CUDA error: CUBLAS_STATUS_NOT_INITIALIZED when calling 'cublasCreate(handle)'` error on train loop
+  * This is probably because of my tokenizer being expanded to support special characters; I should do away with this?
 
 # TODOs:
 * in our dataset, we could get mask for what we padded to our sentence?

@@ -6,7 +6,7 @@ import torch
 
 
 class SwiftAITrainer:
-    def __init__(self, train_size=0.8, batch_size=8, learning_rate=1e-3, epochs=3, warmup_steps=1e3, lr_cycles=4):
+    def __init__(self, train_size=0.8, batch_size=1, learning_rate=1e-3, epochs=3, warmup_steps=1e3, lr_cycles=4):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
         (such as start, pad, newline, UNK, etc), creates training and validation dataloaders for training, defines
@@ -22,21 +22,26 @@ class SwiftAITrainer:
         Scheduler docs: https://huggingface.co/docs/transformers/main_classes/optimizer_schedules#transformers.SchedulerType.
         GPT2LMHead docs: https://huggingface.co/docs/transformers/model_doc/gpt2#transformers.GPT2LMHeadModel.
         """
+        torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
         print("Creating all training objects and variables...")
         self.epochs = epochs
 
+        gpu_gen = torch.Generator(device="cuda")
         lines_dataset = preprocess_and_get_dataset()
         train_data, validation_data = random_split(lines_dataset,
                                                    [math.floor(train_size * len(lines_dataset)),
-                                                    len(lines_dataset) - math.floor(train_size * len(lines_dataset))])
-        self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, drop_last=True)
-        self.validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True, drop_last=True)
-
-        self.device = torch.device("cuda")
+                                                    len(lines_dataset) - math.floor(train_size * len(lines_dataset))],
+                                                   generator=gpu_gen)
+        self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, drop_last=True,
+                                       generator=gpu_gen)
+        self.validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True, drop_last=True,
+                                            generator=gpu_gen)
 
         config = GPT2Config.from_pretrained('gpt2')
         self.model = GPT2LMHeadModel(config)
         self.model.resize_token_embeddings(len(lines_dataset))
+        self.model.cuda()
 
         self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=learning_rate)
         self.scheduler = get_cosine_with_hard_restarts_schedule_with_warmup(self.optimizer,
@@ -63,22 +68,21 @@ class SwiftAITrainer:
         be loaded by our predictor in swiftai.py. Also returns the model! Can set parameters to determine when we
         save the model during training, if at all.
         """
-        self.model.cuda()
         self.model.train()
+        print(next(self.model.parameters()).is_cuda)
 
         for epoch in range(self.epochs):
             print(f'Training Epoch {epoch + 1}...')
             for batch in self.train_loader:
                 # inputs and labels are the same since we're using GPT2LMHead Model, which creates labels from inputs
-                inputs = batch.cuda().to(self.device).long()
-                labels = batch.cuda().to(self.device).long()
+                inputs = batch.cuda().long()
 
                 # grads zeroed; Pytorch accumulates them, so we must reset lest gradients be influenced by prev grads
                 self.model.zero_grad()
                 self.optimizer.zero_grad()
 
                 # forward[0] is loss value of next token prediction, forward[1] is logits
-                loss, logics, _, _, _, _ = self.model.forward(inputs, labels=labels)
+                loss, logits, _, _, _, _ = self.model.forward(inputs, labels=inputs)  # TODO: FIX THIS ERROR
                 print(loss)
 
                 loss.backward()

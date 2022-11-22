@@ -1,5 +1,5 @@
 from transformers import GPT2Tokenizer
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import Dataset
 import torch
 
 
@@ -8,7 +8,7 @@ class LyricLines(Dataset):
     Pytorch dataset class for our lines of lyrics. Contains a tokenizer which tokenizes in the style of GPT2 to train.
     Docs for tokenizer found here:
     https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.
-    Default max length per line of 32 words.
+    Default max length per line of 20 words.
     """
 
     def __init__(self, lyrics_lines: list, max_len=20, unk_token='<|unk|>', bos_token='<|start|>',
@@ -24,7 +24,8 @@ class LyricLines(Dataset):
             # tokenizes line between beginning of sentence token and end of sentence token
             line_bos_eos = f'{bos_token} {line} {eos_token}'
             # pads all sentences to same length (max length of line)
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length')['input_ids']
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length',
+                                         return_token_type_ids=False)['input_ids']
             # converts tokens to a tensor and pads to list of line ids
             self.input_ids.append(torch.Tensor(line_tokens))
         print("Tokenized!")
