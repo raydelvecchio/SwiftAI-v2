@@ -29,6 +29,13 @@ in the future if we choose to train on songs rather than lines.
 # preprocess.py
 Methods and classes used to generate PyTorch dataset from our generated corpus.
 
+# train.py
+Contains the SwiftAITrainer class, which is used to train and save the model. This class creates all necessary variables
+for Pytorch training, then uses them to fine tune the GPT2 model. 
+
+# swiftai.py
+Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
+
 # ERRORS and FIXES
 * model.forward() input cannot be a Tensor
   * Had to convert input and labels to Long datatype before passing into model.forward()

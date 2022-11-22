@@ -45,19 +45,26 @@ class SwiftAITrainer:
                                                                                 self.train_loader),
                                                                             num_cycles=lr_cycles)
         print("SwiftAITrainer ready to train!\n")
+        self.save_model("untrained_swiftai")
 
-    def save_model(self):
+    def save_model(self, name: str):
         """
         Saves both model weights and model object to reload later at any time we want.
         Docs: https://pytorch.org/tutorials/beginner/basics/saveloadrun_tutorial.html#save-and-load-the-model.
         The folder "saved_vars" is in the gitignore because our model/weights are massive (370 MB of numbers)!
         """
-        torch.save(self.model.state_dict(), 'saved_vars/swiftai_weights.pth')
-        torch.save(self.model, 'saved_vars/swiftai_model.pth')
+        folder = "saved_vars/"
+        torch.save(self.model.state_dict(), f'{folder}{name}_weights.pth')
+        torch.save(self.model, f'{folder}{name}_model.pth')
 
-    def train(self):
+    def train(self, save_model_end=True, save_model_epoch=False):
+        """
+        Trains model on our initialized data loaders! After training is complete, we save the model and its weights to
+        be loaded by our predictor in swiftai.py. Also returns the model! Can set parameters to determine when we
+        save the model during training, if at all.
+        """
         self.model.cuda()
-        self.model.train(mode=True)
+        self.model.train()
 
         for epoch in range(self.epochs):
             print(f'Training Epoch {epoch + 1}...')
@@ -78,7 +85,13 @@ class SwiftAITrainer:
                 self.optimizer.step()
                 self.scheduler.step()
 
-        self.save_model()  # save model after training so we have the weights!
+            if save_model_epoch:
+                self.save_model(f'epoch_{epoch + 1}_swiftai')
+
+        if save_model_end:
+            self.save_model("trained_swiftai")
+
+        return self.model
 
 
 if __name__ == "__main__":
