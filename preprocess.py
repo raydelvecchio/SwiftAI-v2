@@ -11,7 +11,7 @@ class LyricLines(Dataset):
     Default max length per line of 20 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=20, bos_token='<|startoftext|>', eos_token='<|endoftext|>'):
+    def __init__(self, lyrics_lines: list, max_len=20, eos_token='<|endoftext|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
@@ -19,8 +19,8 @@ class LyricLines(Dataset):
         print("Tokenizing lyric lines data...")
         self.input_ids = []
         for line in self.lines:
-            # tokenizes line between beginning of sentence token and end of sentence token
-            line_bos_eos = f'{bos_token} {line} {eos_token}'
+            # tokenizes line between beginning EOS tokens, since original GPT2 model did this with text
+            line_bos_eos = f'{eos_token} {line} {eos_token}'
             line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, return_token_type_ids=False)['input_ids']
             self.input_ids.append(torch.Tensor(line_tokens))
         print("Tokenized!")
@@ -52,7 +52,7 @@ def clean_line(line: str) -> str:
     """
     if "LiveGet" in line:
         return ""
-    for c in ['\"', ':', ',', ';', '(', ')']:
+    for c in ['\"', '(', ')']:
         line = line.replace(c, "")
     line = line.replace('\n\n\n', '\n\n')
     line = line.replace('\n\n', '\n')

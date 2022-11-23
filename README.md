@@ -57,6 +57,8 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
 # TODOs:
 * in our dataset, we could get mask for what we padded to our sentence, then remove based on that?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
-  * As part of this, we should save model to a file to load up at any other time
-* Improve prediction making to different sequences, max length, etc
+  * Fix the train loop error!!!
+* Improve prediction making!
+  * Filter out repeat ngrams
+  * increase temperature
 * upload to server to host a website for making such predictions

@@ -43,5 +43,5 @@ class SwiftAI:
 
 if __name__ == "__main__":
     swift = SwiftAI('saved_vars/untrained_swiftai_model.pth')
-    lines = swift.make_predictions("hello there my friend")
+    lines = swift.make_predictions("I love Antonio because he is")
     print(lines)
