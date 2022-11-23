@@ -1,7 +1,7 @@
 import torch
 from train import SwiftAITrainer
-from preprocess import get_tokenizer, clean_line
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from preprocess import clean_line
+from transformers import GPT2Tokenizer
 
 
 class SwiftAI:
@@ -30,6 +30,10 @@ class SwiftAI:
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
     def make_predictions(self, text_prompt: str, max_length=20) -> str:
+        """
+        Given a text prompt, generate text with our model!
+        Example text generation: https://huggingface.co/blog/how-to-generate
+        """
         text_prompt = clean_line(text_prompt)
         self.model.eval()
         starting_tokens = self.tokenizer.encode(text_prompt, return_tensors='pt').to(self.device)
@@ -38,13 +42,6 @@ class SwiftAI:
 
 
 if __name__ == "__main__":
-    # swift = SwiftAI('saved_vars/untrained_swiftai_model.pth')
-    # lines = swift.make_predictions("hello there my friend")
-    # print(lines)
-
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    model = GPT2LMHeadModel.from_pretrained("gpt2")
-    input_ids = tokenizer.encode('hello there my friend', return_tensors='pt')
-    greedy_output = model.generate(input_ids, max_length=20)
-    print(tokenizer.decode(greedy_output[0]))
-
+    swift = SwiftAI('saved_vars/untrained_swiftai_model.pth')
+    lines = swift.make_predictions("hello there my friend")
+    print(lines)

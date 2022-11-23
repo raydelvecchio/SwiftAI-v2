@@ -32,7 +32,11 @@ class LyricLines(Dataset):
         return self.input_ids[index]
 
 
-def get_tokenizer(bos_token='<|startoftext|>', eos_token='<|endoftext|>', unk_token='<|unk|>'):
+def get_special_tokenizer(bos_token='<|startoftext|>', eos_token='<|endoftext|>', unk_token='<|unk|>'):
+    """
+    Creates tokenizer with special tokens if we need. Currently deprecated and not used in favor of the direct GPT2
+    Tokenizer without special tokens.
+    """
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     special_tokens = {'bos_token': bos_token,
                       'eos_token': eos_token,
