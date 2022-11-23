@@ -11,11 +11,10 @@ class LyricLines(Dataset):
     Default max length per line of 20 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=20, bos_token='<|startoftext|>', eos_token='<|endoftext|>',
-                 unk_token='<|unk|>'):
+    def __init__(self, lyrics_lines: list, max_len=20, bos_token='<|startoftext|>', eos_token='<|endoftext|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
-        self.tokenizer = get_tokenizer(bos_token, eos_token, unk_token)
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
 
         print("Tokenizing lyric lines data...")
         self.input_ids = []
@@ -34,7 +33,7 @@ class LyricLines(Dataset):
 
 
 def get_tokenizer(bos_token='<|startoftext|>', eos_token='<|endoftext|>', unk_token='<|unk|>'):
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2', add_prefix_space=True)
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     special_tokens = {'bos_token': bos_token,
                       'eos_token': eos_token,
                       'unk_token': unk_token}
@@ -49,13 +48,11 @@ def clean_line(line: str) -> str:
     """
     if "LiveGet" in line:
         return ""
-    for c in ['\"', '\'', ':', ',', '.', '?', '!', ';', '(', ')', '']:
+    for c in ['\"', ':', ',', ';', '(', ')']:
         line = line.replace(c, "")
-    line = line.replace('-', " ")
     line = line.replace('\n\n\n', '\n\n')
     line = line.replace('\n\n', '\n')
     line = line.replace('\n', '')
-    line = line.lower()
     return line
 
 

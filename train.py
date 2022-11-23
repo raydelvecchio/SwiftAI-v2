@@ -1,4 +1,4 @@
-from transformers import GPT2LMHeadModel, GPT2Config, get_cosine_with_hard_restarts_schedule_with_warmup
+from transformers import GPT2LMHeadModel, get_cosine_with_hard_restarts_schedule_with_warmup
 from preprocess import preprocess_get_dataset_and_tokenizer
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
@@ -7,8 +7,8 @@ import torch
 
 
 class SwiftAITrainer:
-    def __init__(self, use_gpu=True, train_size=0.8, batch_size=1, learning_rate=1e-3, epochs=3, warmup_steps=1e3,
-                 lr_cycles=4):
+    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.8, batch_size=1,
+                 learning_rate=1e-3, epochs=3, warmup_steps=1e3, lr_cycles=4):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
         (such as start, pad, newline, UNK, etc), creates training and validation dataloaders for training, defines
@@ -16,7 +16,8 @@ class SwiftAITrainer:
         schedule to define how my learning rate changes as we train. To achieve a higher accuracy, we can adjust the
         input hyperparameters until we converge to a better model. If this doesn't work, we can examine docs for
         our optimizer and scheduler to change default values if need be. Can opt to use GPU for training or stick
-        with CPU usage only with use_gpu parameter.
+        with CPU usage only with use_gpu parameter. Can also load untrained model instead of downloading it every
+        time by setting load_untrained=True and specifiying an untrained_path.
         Config docs: https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig.
         Pre-Model docs: https://huggingface.co/docs/transformers/main/en/main_classes/model#transformers.PreTrainedModel.
         Pytorch Module docs: https://pytorch.org/docs/stable/generated/torch.nn.Module.html.
@@ -44,9 +45,16 @@ class SwiftAITrainer:
         self.validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True, drop_last=True,
                                             generator=generator)
 
-        config = GPT2Config.from_pretrained('gpt2')
-        self.model = GPT2LMHeadModel(config)
+        if load_untrained and untrained_path is not None:
+            print("Loading saved untrained model...")
+            self.model = torch.load(untrained_path)
+            print("Model loaded!")
+        else:
+            print("Downloading GPT2 weights...")
+            self.model = GPT2LMHeadModel.from_pretrained('gpt2')
+
         self.model.resize_token_embeddings(len(tokenizer))
+
         if use_gpu:
             self.model.cuda()
 
@@ -56,8 +64,13 @@ class SwiftAITrainer:
                                                                             num_training_steps=epochs * len(
                                                                                 self.train_loader),
                                                                             num_cycles=lr_cycles)
+
         print("SwiftAITrainer ready to train!\n")
-        self.save_model("untrained_swiftai")
+
+        if not load_untrained:
+            print("Saving untrained model...")
+            self.save_model("untrained_swiftai")
+            print("Model saved!")
 
     def save_model(self, name: str):
         """
@@ -120,4 +133,4 @@ class SwiftAITrainer:
 
 if __name__ == "__main__":
     trainer = SwiftAITrainer()
-    trainer.train(plot_loss=True)
+    # trainer.train(plot_loss=True)
