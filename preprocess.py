@@ -11,27 +11,18 @@ class LyricLines(Dataset):
     Default max length per line of 20 words.
     """
 
-    def __init__(self, lyrics_lines: list, max_len=20, pad_token='<|pad|>', bos_token='<|startoftext|>',
-                 eos_token='<|endoftext|>', unk_token='<|unk|>'):
-
+    def __init__(self, lyrics_lines: list, max_len=20, bos_token='<|startoftext|>', eos_token='<|endoftext|>',
+                 unk_token='<|unk|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', add_prefix_space=True)
-        special_tokens = {'pad_token': pad_token,
-                          'bos_token': bos_token,
-                          'eos_token': eos_token,
-                          'unk_token': unk_token}
-        self.tokenizer.add_special_tokens(special_tokens)
+        self.tokenizer = get_tokenizer(bos_token, eos_token, unk_token)
 
         print("Tokenizing lyric lines data...")
         self.input_ids = []
         for line in self.lines:
             # tokenizes line between beginning of sentence token and end of sentence token
             line_bos_eos = f'{bos_token} {line} {eos_token}'
-            # pads all sentences to same length (max length of line)
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, padding='max_length',
-                                         return_token_type_ids=False)['input_ids']
-            # converts tokens to a tensor and pads to list of line ids
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, return_token_type_ids=False)['input_ids']
             self.input_ids.append(torch.Tensor(line_tokens))
         print("Tokenized!")
 
@@ -40,6 +31,15 @@ class LyricLines(Dataset):
 
     def __getitem__(self, index):
         return self.input_ids[index]
+
+
+def get_tokenizer(bos_token='<|startoftext|>', eos_token='<|endoftext|>', unk_token='<|unk|>'):
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2', add_prefix_space=True)
+    special_tokens = {'bos_token': bos_token,
+                      'eos_token': eos_token,
+                      'unk_token': unk_token}
+    tokenizer.add_special_tokens(special_tokens)
+    return tokenizer
 
 
 def clean_line(line: str) -> str:

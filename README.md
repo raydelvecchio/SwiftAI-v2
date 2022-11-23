@@ -58,5 +58,5 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
 * in our dataset, we could get mask for what we padded to our sentence, then remove based on that?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
   * As part of this, we should save model to a file to load up at any other time
-* Load saved model and make predictions based on it (new file separate from train.py)
+* Improve prediction making to different sequences, max length, etc
 * upload to server to host a website for making such predictions
