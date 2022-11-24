@@ -1,6 +1,6 @@
 import torch
 from train import SwiftAITrainer
-from preprocess import clean_line
+from preprocess import clean_line, get_special_tokenizer
 from transformers import GPT2Tokenizer
 
 
@@ -15,7 +15,7 @@ class SwiftAI:
         if load_not_train:
             print("Loading model from path...")
             self.model = torch.load(load_path)
-            print("Model loaded!")
+            print("Model loaded!\n")
         else:
             trainer = SwiftAITrainer()
             self.model = trainer.train(save_model_end=False)
@@ -27,7 +27,7 @@ class SwiftAI:
 
         self.model.to(self.device)
 
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        self.tokenizer = get_special_tokenizer()
 
     def make_predictions(self, text_prompt: str, length=20, k=25, p=0.9, temp=1) -> str:
         """
@@ -37,7 +37,7 @@ class SwiftAI:
         Example text generation: https://huggingface.co/blog/how-to-generate
         Generate function docs: https://huggingface.co/docs/transformers/v4.24.0/en/main_classes/text_generation#transformers.generation_utils.GenerationMixin.generate
         """
-        text_prompt = clean_line(text_prompt)
+        # text_prompt = clean_line(text_prompt)
         self.model.eval()
         starting_tokens = self.tokenizer.encode(text_prompt, return_tensors='pt').to(self.device)
         output = self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,

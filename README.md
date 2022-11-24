@@ -52,13 +52,10 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
   * Also added `self.model.resize_token_embeddings(len(tokenizer))` in SwiftAITrainer class to account for new tokens
 * Train loop with batch size >1: `RuntimeError: stack expects each tensor to be equal size, but got [20] at entry 0 and [22] at entry 7`
   * Does not occur when batch size is = 1; model trains in this case
-  * Seems like the last tensor has some overflow from our max limit of 20?
+  * Fixed by defining a pad token in our tokenizer and setting `max_length=max_len, truncation=True, padding='max_length'` when creating our initial tokenizations!
 
 # TODOs:
 * in our dataset, we could get mask for what we padded to our sentence, then remove based on that?
 * Train model with metrics to track progress (loss, accuracy, BLEU)
   * Fix the train loop error!!!
-* Improve prediction making!
-  * Filter out repeat ngrams
-  * increase temperature
 * upload to server to host a website for making such predictions

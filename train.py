@@ -7,7 +7,7 @@ import torch
 
 
 class SwiftAITrainer:
-    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.8, batch_size=1,
+    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.8, batch_size=8,
                  learning_rate=1e-3, epochs=3, warmup_steps=1e3, lr_cycles=4):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
@@ -48,10 +48,11 @@ class SwiftAITrainer:
         if load_untrained and untrained_path is not None:
             print("Loading saved untrained model...")
             self.model = torch.load(untrained_path)
-            print("Model loaded!")
+            print("Model loaded!\n")
         else:
             print("Downloading GPT2 weights...")
             self.model = GPT2LMHeadModel.from_pretrained('gpt2')
+            print("Loaded!\n")
 
         self.model.resize_token_embeddings(len(tokenizer))
 
@@ -70,7 +71,7 @@ class SwiftAITrainer:
         if not load_untrained:
             print("Saving untrained model...")
             self.save_model("untrained_swiftai")
-            print("Model saved!")
+            print("Model saved!\n")
 
     def save_model(self, name: str):
         """
@@ -93,7 +94,7 @@ class SwiftAITrainer:
         loss_list = []
 
         for epoch in range(self.epochs):
-            print(f'Training Epoch {epoch + 1}...')
+            print(f'\nTraining Epoch {epoch + 1}...\n')
             for batch in self.train_loader:
                 if self.use_gpu:
                     inputs = batch.cuda().long()
@@ -117,10 +118,14 @@ class SwiftAITrainer:
                 self.scheduler.step()
 
             if save_model_epoch:
+                print("Saving model after epoch...")
                 self.save_model(f'epoch_{epoch + 1}_swiftai')
+                print("Model saved!\n")
 
         if save_model_end:
+            print("Saving model after training...")
             self.save_model("trained_swiftai")
+            print("Model saved!\n")
 
         if plot_loss:
             plt.plot(loss_list)
@@ -132,5 +137,5 @@ class SwiftAITrainer:
 
 
 if __name__ == "__main__":
-    trainer = SwiftAITrainer()
-    # trainer.train(plot_loss=True)
+    trainer = SwiftAITrainer(load_untrained=True, untrained_path='saved_vars/untrained_swiftai_model.pth')
+    trainer.train(plot_loss=True)

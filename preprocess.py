@@ -14,16 +14,17 @@ class LyricLines(Dataset):
     def __init__(self, lyrics_lines: list, max_len=20, eos_token='<|endoftext|>'):
         self.lines = lyrics_lines
         self.num_lines = len(self.lines)
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        self.tokenizer = get_special_tokenizer()
 
         print("Tokenizing lyric lines data...")
         self.input_ids = []
         for line in self.lines:
             # tokenizes line between beginning EOS tokens, since original GPT2 model did this with text
             line_bos_eos = f'{eos_token} {line} {eos_token}'
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, return_token_type_ids=False)['input_ids']
+            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, truncation=True,
+                                         padding='max_length')['input_ids']
             self.input_ids.append(torch.Tensor(line_tokens))
-        print("Tokenized!")
+        print("Tokenized!\n")
 
     def __len__(self):
         return self.num_lines
@@ -32,25 +33,20 @@ class LyricLines(Dataset):
         return self.input_ids[index]
 
 
-def get_special_tokenizer(bos_token='<|startoftext|>', eos_token='<|endoftext|>', unk_token='<|unk|>'):
+def get_special_tokenizer(pad_token='<|pad|>'):
     """
     Creates tokenizer with special tokens if we need. Currently deprecated and not used in favor of the direct GPT2
     Tokenizer without special tokens.
     """
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    special_tokens = {'bos_token': bos_token,
-                      'eos_token': eos_token,
-                      'unk_token': unk_token}
-    tokenizer.add_special_tokens(special_tokens)
-    return tokenizer
+    return GPT2Tokenizer.from_pretrained('gpt2', pad_token=pad_token)
 
 
-def clean_line(line: str) -> str:
+def clean_line(line: str, max_len=20) -> str:
     """
     Cleans a line of a song per our preprocessing spec. May have to change depending on the spec of our pretrained
     model we want to fine tune.
     """
-    if "LiveGet" in line:
+    if "LiveGet" in line or len(line.split()) >= max_len:
         return ""
     for c in ['\"', '(', ')']:
         line = line.replace(c, "")
@@ -71,5 +67,6 @@ def preprocess_get_dataset_and_tokenizer() -> (Dataset, GPT2Tokenizer):
     with open('data/lyrics.txt', 'r', encoding="utf-8") as f:
         lines = f.readlines()
     lines = [clean_line(line) for line in lines]
+    print(len(lines))
     dataset = LyricLines(lines)
     return dataset, dataset.tokenizer

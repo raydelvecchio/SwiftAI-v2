@@ -3,7 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="568c9f19-58a7-48ff-ae8b-fb0f4f55eb9d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/preprocess.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/swiftai.py" beforeDir="false" afterPath="$PROJECT_DIR$/swiftai.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,7 +34,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
-  <component name="RunManager" selected="Python.swiftai">
+  <component name="RunManager" selected="Python.train">
     <configuration name="swiftai" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="SwiftAIv2" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -76,8 +79,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.swiftai" />
         <item itemvalue="Python.train" />
+        <item itemvalue="Python.swiftai" />
       </list>
     </recent_temporary>
   </component>
