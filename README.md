@@ -69,4 +69,5 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
   * Use masks during training to block out padded text
   * Look at other implementations of text generation?
   * Try to daisy chain generation together with each other?
+  * Filter out `See Taylor Swift LiveGet tickets as low as $307You might also like` metadata line
 * upload to server to host a website for making such predictions

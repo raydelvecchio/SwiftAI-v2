@@ -28,7 +28,7 @@ class SwiftAI:
 
         self.tokenizer = get_special_tokenizer()
 
-    def make_predictions(self, text_prompt: str, length=500, k=100, p=0.9, temp=1.2, num_ret=5) -> list:
+    def make_predictions(self, text_prompt: str, length=500, k=25, p=0.9, temp=1.2, num_ret=5) -> list:
         """
         Given a text prompt, generate text with our model! Hyperparameters like max length, k, p, and temp can be
         adjusted to vary the generation of text that we produce. In the future, we could do many samples with a lot of
@@ -45,5 +45,5 @@ class SwiftAI:
 
 if __name__ == "__main__":
     swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
-    song = swift.make_predictions("Jules is so cool")[0]
+    song = swift.make_predictions("I've always wanted to ride a horse")[0]
     print(song)
