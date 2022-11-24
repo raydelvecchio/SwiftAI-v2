@@ -37,6 +37,7 @@ customizability for your model's training!
 
 # swiftai.py
 Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
+Generates lyrics with varying temperatures for a better distribution over "creative" and "safe" song generation.
 
 # ERRORS and FIXES
 * Train loop: model.forward() input cannot be a Tensor
