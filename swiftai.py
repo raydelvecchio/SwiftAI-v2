@@ -28,22 +28,30 @@ class SwiftAI:
 
         self.tokenizer = get_special_tokenizer()
 
-    def make_predictions(self, text_prompt: str, length=500, k=25, p=0.9, temp=1.2, num_ret=5) -> list:
+    def write_song(self, text_prompt: str, length=350, k=25, p=0.9, max_temp=1.5, num_ret=3, ngram_block=2) -> list:
         """
         Given a text prompt, generate text with our model! Hyperparameters like max length, k, p, and temp can be
         adjusted to vary the generation of text that we produce. In the future, we could do many samples with a lot of
-        k, p, and temp and compare it to a metric to find the "best" generation.
+        k, p, and temp and compare it to a metric to find the "best" generation. Generates num_ret outputs all with
+        decreasing temperature values for the highest variance of answers! Can block out repeating grams with the
+        repeat_block variable.
         Example text generation: https://huggingface.co/blog/how-to-generate
         Generate function docs: https://huggingface.co/docs/transformers/v4.24.0/en/main_classes/text_generation#transformers.generation_utils.GenerationMixin.generate
         """
         self.model.eval()
         starting_tokens = self.tokenizer.encode(text_prompt, return_tensors='pt').to(self.device)
-        outputs = self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,
-                                      temperature=temp, num_return_sequences=num_ret)
-        return [self.tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
+
+        outputs = []
+        max, end, inc = int(max_temp * 10), int((max_temp - (0.1 * (num_ret+1))) * 10), int(-0.1 * 10)
+        for i in range(max, end, inc):
+            outputs += self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,
+                                           temperature=i / 10, num_return_sequences=1)
+        return [self.tokenizer.decode(output, skip_special_tokens=True, no_repeat_ngram_size=ngram_block)
+                for output in outputs]
 
 
 if __name__ == "__main__":
     swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
-    song = swift.make_predictions("I've always wanted to ride a horse")[0]
-    print(song)
+    for song in swift.write_song("You are so beautiful"):
+        print(song)
+        input()

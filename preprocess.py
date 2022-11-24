@@ -9,6 +9,7 @@ class LyricLines(Dataset):
     """
     Pytorch dataset class for our lines of lyrics. Contains a tokenizer which tokenizes in the style of GPT2 to train.
     Default max length of 20 words per line.
+    Saves masks so we can ignore our padding during training!
     Docs for tokenizer found here:
     https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.
     """
@@ -20,19 +21,22 @@ class LyricLines(Dataset):
 
         print("Tokenizing lyric lines data...")
         self.input_ids = []
+        self.attention_masks = []
         for line in self.lines:
             # tokenizes line between beginning EOS tokens, since original GPT2 model did this with text
             line_bos_eos = f'{eos_token} {line} {eos_token}'
-            line_tokens = self.tokenizer(line_bos_eos, max_length=max_len, truncation=True,
-                                         padding='max_length')['input_ids']
+            tokenizer_out = self.tokenizer(line_bos_eos, max_length=max_len, truncation=True, padding='max_length')
+            line_tokens = tokenizer_out['input_ids']
+            mask = tokenizer_out['attention_mask']
             self.input_ids.append(torch.Tensor(line_tokens))
+            self.attention_masks.append(torch.Tensor(mask))
         print("Tokenized!\n")
 
     def __len__(self):
         return self.num_lines
 
     def __getitem__(self, index):
-        return self.input_ids[index]
+        return self.input_ids[index], self.attention_masks[index]
 
 
 class LyricSongs(Dataset):
@@ -40,6 +44,7 @@ class LyricSongs(Dataset):
     Pytorch dataset class for training on songs rather than lines.
     Contains a tokenizer which tokenizes in the style of GPT2 to train.
     Default max length per line of 500 words per song! This is subject to change however.
+    Saves masks so we can ignore our padding during training!
     Docs for tokenizer found here:
     https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.
     """
@@ -51,19 +56,22 @@ class LyricSongs(Dataset):
 
         print("Tokenizing songs data...")
         self.input_ids = []
+        self.attention_masks = []
         for song in self.songs:
             # tokenizes line between beginning EOS tokens, since original GPT2 model did this with text
             song_bos_eos = f'{eos_token} {song} {eos_token}'
-            song_tokens = self.tokenizer(song_bos_eos, max_length=max_len, truncation=True,
-                                         padding='max_length')['input_ids']
+            tokenizer_out = self.tokenizer(song_bos_eos, max_length=max_len, truncation=True, padding='max_length')
+            song_tokens = tokenizer_out['input_ids']
+            mask = tokenizer_out['attention_mask']
             self.input_ids.append(torch.Tensor(song_tokens))
+            self.attention_masks.append(torch.Tensor(mask))
         print("Tokenized!\n")
 
     def __len__(self):
         return self.num_songs
 
     def __getitem__(self, index):
-        return self.input_ids[index]
+        return self.input_ids[index], self.attention_masks[index]
 
 
 def get_special_tokenizer(pad_token='<|pad|>'):
@@ -109,8 +117,6 @@ def preprocess_get_dataset_and_tokenizer(songs_over_lines=True, eos_token='<|end
             for track in tracks:
                 lyrics = track['song']['lyrics']
                 lyrics = clean_song(lyrics)
-                # here we replace newline token with EOS token so we learn where a line ends! - DEPRECATED
-                # lyrics = lyrics.replace('\n', f' {eos_token} ')
                 songs.append(lyrics)
         dataset = LyricSongs(songs)
         return dataset, dataset.tokenizer

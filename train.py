@@ -1,8 +1,7 @@
 from transformers import GPT2LMHeadModel, get_cosine_with_hard_restarts_schedule_with_warmup
 from preprocess import preprocess_get_dataset_and_tokenizer
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-import math
 import torch
 
 
@@ -14,8 +13,8 @@ def print_cuda_memory_info():
 
 
 class SwiftAITrainer:
-    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.99, batch_size=16,
-                 learning_rate=1e-3, epochs=3, warmup_steps=4*1e2, lr_cycles=3, songs_over_lines=True):
+    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, batch_size=16,
+                 learning_rate=1e-3, epochs=5, warmup_steps=4*1e2, lr_cycles=3, songs_over_lines=True):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
         (such as start, pad, newline, UNK, etc), creates training and validation dataloaders for training, defines
@@ -50,14 +49,8 @@ class SwiftAITrainer:
 
         dataset, tokenizer = preprocess_get_dataset_and_tokenizer(songs_over_lines=songs_over_lines)
 
-        train_data, validation_data = random_split(dataset,
-                                                   [math.floor(train_size * len(dataset)),
-                                                    len(dataset) - math.floor(train_size * len(dataset))],
-                                                   generator=generator)
-        self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, drop_last=True,
+        self.train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True,
                                        generator=generator)
-        self.validation_loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True, drop_last=True,
-                                            generator=generator)
 
         if load_untrained and untrained_path is not None:
             print("Loading saved untrained model...")
@@ -112,9 +105,10 @@ class SwiftAITrainer:
 
         for epoch in range(self.epochs):
             print(f'\nTraining Epoch {epoch + 1}...\n')
-            for batch in self.train_loader:
+            for batch, mask in self.train_loader:
                 if self.use_gpu:
                     inputs = batch.cuda().long()
+                    mask = mask.cuda()
                 else:
                     inputs = batch.long()
 
@@ -124,7 +118,7 @@ class SwiftAITrainer:
 
                 # forward[0] is loss Tensor of next token prediction, forward[1] is logits Tensor
                 # inputs and labels are the same since we're using GPT2LMHead Model, which creates labels from inputs
-                outputs = self.model.forward(inputs, labels=inputs)
+                outputs = self.model.forward(inputs, labels=inputs, attention_mask=mask)
                 loss = outputs[0]
                 loss_val = float(loss.item())
                 loss_list.append(loss_val)

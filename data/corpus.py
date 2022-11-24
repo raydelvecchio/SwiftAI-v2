@@ -26,6 +26,7 @@ def clean_song(song: str) -> str:
     song = song.replace('\n\n', '\n')
     for c in ['\"', '(', ')']:
         song = song.replace(c, "")
+    song = song.replace("See Taylor Swift LiveGet tickets as low as $307You might also like", "")  # metatext bad!
     return song[song.find('\n') + 1: song.rfind('\n')]
 
 
