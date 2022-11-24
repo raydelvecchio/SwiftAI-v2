@@ -7,8 +7,8 @@ import torch
 
 
 class SwiftAITrainer:
-    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.8, batch_size=8,
-                 learning_rate=1e-3, epochs=3, warmup_steps=1e3, lr_cycles=4):
+    def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.99, batch_size=16,
+                 learning_rate=1e-3, epochs=3, warmup_steps=3*1e2, lr_cycles=3):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
         (such as start, pad, newline, UNK, etc), creates training and validation dataloaders for training, defines

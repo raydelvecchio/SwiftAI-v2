@@ -41,12 +41,12 @@ def get_special_tokenizer(pad_token='<|pad|>'):
     return GPT2Tokenizer.from_pretrained('gpt2', pad_token=pad_token)
 
 
-def clean_line(line: str, max_len=20) -> str:
+def clean_line(line: str) -> str:
     """
     Cleans a line of a song per our preprocessing spec. May have to change depending on the spec of our pretrained
     model we want to fine tune.
     """
-    if "LiveGet" in line or len(line.split()) >= max_len:
+    if "LiveGet" in line:
         return ""
     for c in ['\"', '(', ')']:
         line = line.replace(c, "")
@@ -67,6 +67,5 @@ def preprocess_get_dataset_and_tokenizer() -> (Dataset, GPT2Tokenizer):
     with open('data/lyrics.txt', 'r', encoding="utf-8") as f:
         lines = f.readlines()
     lines = [clean_line(line) for line in lines]
-    print(len(lines))
     dataset = LyricLines(lines)
     return dataset, dataset.tokenizer

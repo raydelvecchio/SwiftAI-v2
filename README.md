@@ -55,7 +55,6 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
   * Fixed by defining a pad token in our tokenizer and setting `max_length=max_len, truncation=True, padding='max_length'` when creating our initial tokenizations!
 
 # TODOs:
-* in our dataset, we could get mask for what we padded to our sentence, then remove based on that?
-* Train model with metrics to track progress (loss, accuracy, BLEU)
-  * Fix the train loop error!!!
+* Add or remove model validation during training
+* Train model on entire songs (or sets of lines), NOT on lines alone to enhance generation ability :(
 * upload to server to host a website for making such predictions
