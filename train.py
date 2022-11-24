@@ -6,9 +6,16 @@ import math
 import torch
 
 
+def print_cuda_memory_info():
+    """
+    Prints memory information for GPU; used for debugging out of memory errors.
+    """
+    print(torch.cuda.memory_summary(device=None, abbreviated=False))
+
+
 class SwiftAITrainer:
     def __init__(self, use_gpu=True, load_untrained=False, untrained_path=None, train_size=0.99, batch_size=16,
-                 learning_rate=1e-3, epochs=3, warmup_steps=3*1e2, lr_cycles=3):
+                 learning_rate=1e-3, epochs=3, warmup_steps=4*1e2, lr_cycles=3, songs_over_lines=True):
         """
         Initializes the pre-trained GPT2 model from configuration, resizes embedding to include new vocabulary created
         (such as start, pad, newline, UNK, etc), creates training and validation dataloaders for training, defines
@@ -18,6 +25,7 @@ class SwiftAITrainer:
         our optimizer and scheduler to change default values if need be. Can opt to use GPU for training or stick
         with CPU usage only with use_gpu parameter. Can also load untrained model instead of downloading it every
         time by setting load_untrained=True and specifiying an untrained_path.
+
         Config docs: https://huggingface.co/docs/transformers/main_classes/configuration#transformers.PretrainedConfig.
         Pre-Model docs: https://huggingface.co/docs/transformers/main/en/main_classes/model#transformers.PreTrainedModel.
         Pytorch Module docs: https://pytorch.org/docs/stable/generated/torch.nn.Module.html.
@@ -25,7 +33,11 @@ class SwiftAITrainer:
         AdamW docs: https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html#torch.optim.AdamW.
         Scheduler docs: https://huggingface.co/docs/transformers/main_classes/optimizer_schedules#transformers.SchedulerType.
         GPT2LMHead docs: https://huggingface.co/docs/transformers/model_doc/gpt2#transformers.GPT2LMHeadModel.
+
+        For songs, a batch size of 1 works the best locally. For lines, a batch size of 16 works best.
         """
+        self.songs_over_lines = songs_over_lines
+
         print("Creating all training objects and variables...")
         self.epochs = epochs
         self.use_gpu = use_gpu
@@ -35,10 +47,12 @@ class SwiftAITrainer:
             generator = torch.Generator(device="cuda")
         else:
             generator = torch.Generator(device="cpu")
-        lines_dataset, tokenizer = preprocess_get_dataset_and_tokenizer()
-        train_data, validation_data = random_split(lines_dataset,
-                                                   [math.floor(train_size * len(lines_dataset)),
-                                                    len(lines_dataset) - math.floor(train_size * len(lines_dataset))],
+
+        dataset, tokenizer = preprocess_get_dataset_and_tokenizer(songs_over_lines=songs_over_lines)
+
+        train_data, validation_data = random_split(dataset,
+                                                   [math.floor(train_size * len(dataset)),
+                                                    len(dataset) - math.floor(train_size * len(dataset))],
                                                    generator=generator)
         self.train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, drop_last=True,
                                        generator=generator)
@@ -89,6 +103,9 @@ class SwiftAITrainer:
         be loaded by our predictor in swiftai.py. Also returns the model! Can set parameters to determine when we
         save the model during training, if at all.
         """
+        if self.use_gpu:
+            torch.cuda.empty_cache()
+
         self.model.train()
 
         loss_list = []
@@ -118,13 +135,21 @@ class SwiftAITrainer:
                 self.scheduler.step()
 
             if save_model_epoch:
+                if self.songs_over_lines:
+                    append = "songs"
+                else:
+                    append = "lines"
                 print("Saving model after epoch...")
-                self.save_model(f'epoch_{epoch + 1}_swiftai')
+                self.save_model(f'epoch_{epoch + 1}_swiftai_{append}')
                 print("Model saved!\n")
 
         if save_model_end:
+            if self.songs_over_lines:
+                append = "songs"
+            else:
+                append = "lines"
             print("Saving model after training...")
-            self.save_model("trained_swiftai")
+            self.save_model(f'trained_swiftai_{append}')
             print("Model saved!\n")
 
         if plot_loss:
@@ -137,5 +162,6 @@ class SwiftAITrainer:
 
 
 if __name__ == "__main__":
-    trainer = SwiftAITrainer(load_untrained=True, untrained_path='saved_vars/untrained_swiftai_model.pth')
+    trainer = SwiftAITrainer(load_untrained=True, untrained_path='saved_vars/untrained_swiftai_model.pth',
+                             songs_over_lines=True, batch_size=1)
     trainer.train(plot_loss=True)

@@ -27,11 +27,13 @@ Creates our text corpus of Taylor Swift songs. Should only be run once locally a
 in the future if we choose to train on songs rather than lines.
 
 # preprocess.py
-Methods and classes used to generate PyTorch dataset from our generated corpus.
+Methods and classes used to generate PyTorch dataset from our generated corpus. Can generate a dataset for training
+either line-by-line or song-by-song!
 
 # train.py
 Contains the SwiftAITrainer class, which is used to train and save the model. This class creates all necessary variables
-for Pytorch training, then uses them to fine tune the GPT2 model. 
+for Pytorch training, then uses them to fine tune the GPT2 model. Can train line by line or song by song. Tons of 
+customizability for your model's training!
 
 # swiftai.py
 Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
@@ -53,8 +55,18 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
 * Train loop with batch size >1: `RuntimeError: stack expects each tensor to be equal size, but got [20] at entry 0 and [22] at entry 7`
   * Does not occur when batch size is = 1; model trains in this case
   * Fixed by defining a pad token in our tokenizer and setting `max_length=max_len, truncation=True, padding='max_length'` when creating our initial tokenizations!
+* Training on songs dataset, not lyrics: `torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 148.00 MiB (GPU 0; 4.00 GiB total capacity; 2.32 GiB already allocated; 0 bytes free; 3.35 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF`
+  * Reducing to a batch size of 1 fixes this
+  * Could also accumulate gradients or something to fix this in the future?
+* Bad text generation produces a ton of <|EOS|> tokens and short songs (when trained on songs)
+  * Fixed by only appending <|EOS|> before and after an entire SONG, rather than before and after each LINE
+  * Now it generates entire songs!
 
 # TODOs:
 * Add or remove model validation during training
-* Train model on entire songs (or sets of lines), NOT on lines alone to enhance generation ability :(
+* Improve song generation:
+  * Accumulate gradients to avoid out of memory issue?
+  * Use masks during training to block out padded text
+  * Look at other implementations of text generation?
+  * Try to daisy chain generation together with each other?
 * upload to server to host a website for making such predictions

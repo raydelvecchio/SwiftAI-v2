@@ -1,7 +1,6 @@
 import torch
 from train import SwiftAITrainer
-from preprocess import clean_line, get_special_tokenizer
-from transformers import GPT2Tokenizer
+from preprocess import get_special_tokenizer
 
 
 class SwiftAI:
@@ -29,7 +28,7 @@ class SwiftAI:
 
         self.tokenizer = get_special_tokenizer()
 
-    def make_predictions(self, text_prompt: str, length=20, k=100, p=0.9, temp=1.2, num_ret=5) -> list:
+    def make_predictions(self, text_prompt: str, length=500, k=100, p=0.9, temp=1.2, num_ret=5) -> list:
         """
         Given a text prompt, generate text with our model! Hyperparameters like max length, k, p, and temp can be
         adjusted to vary the generation of text that we produce. In the future, we could do many samples with a lot of
@@ -39,12 +38,12 @@ class SwiftAI:
         """
         self.model.eval()
         starting_tokens = self.tokenizer.encode(text_prompt, return_tensors='pt').to(self.device)
-        outputs = self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length*10,
+        outputs = self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,
                                       temperature=temp, num_return_sequences=num_ret)
-        return [self.tokenizer.decode(output) for output in outputs]
+        return [self.tokenizer.decode(output, skip_special_tokens=True) for output in outputs]
 
 
 if __name__ == "__main__":
-    swift = SwiftAI('saved_vars/trained_swiftai_model.pth')
-    lines = swift.make_predictions("I've got a")
-    print(lines)
+    swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
+    song = swift.make_predictions("Jules is so cool")[0]
+    print(song)
