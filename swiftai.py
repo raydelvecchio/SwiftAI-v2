@@ -28,7 +28,7 @@ class SwiftAI:
 
         self.tokenizer = get_special_tokenizer()
 
-    def write_song(self, text_prompt: str, length=300, k=75, p=0.9, max_temp=1.5, num_ret=3, ngram_block=8) -> list:
+    def write_song(self, text_prompt: str, length=300, k=50, p=0.9, max_temp=1.5, num_ret=3, ngram_block=12) -> list:
         """
         Given a text prompt, generate text with our model! Hyperparameters like max length, k, p, and temp can be
         adjusted to vary the generation of text that we produce. In the future, we could do many samples with a lot of
@@ -39,19 +39,22 @@ class SwiftAI:
         Generate function docs: https://huggingface.co/docs/transformers/v4.24.0/en/main_classes/text_generation#transformers.generation_utils.GenerationMixin.generate
         """
         self.model.eval()
+
         starting_tokens = self.tokenizer.encode(text_prompt, return_tensors='pt').to(self.device)
+
+        # force_tokens = starting_tokens.tolist()  # we want to retain context here, so force model to generate them
 
         outputs = []
         max, end, inc = int(max_temp * 10), int((max_temp - (0.1 * (num_ret + 1))) * 10), int(-0.1 * 10)
         for i in range(max, end, inc):
             outputs += self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,
-                                           temperature=i / 10, no_repeat_ngram_size=ngram_block, num_return_sequences=1)
+                                           temperature=i / 10, no_repeat_ngram_size=ngram_block)
         return [self.tokenizer.decode(output, skip_special_tokens=True)
                 for output in outputs]
 
 
 if __name__ == "__main__":
     swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
-    for song in swift.write_song("I want to date Ray"):
+    for song in swift.write_song("Millie is so beautiful, Millie is so kind, Millie likes to sniff my socks"):
         print(song)
         input()

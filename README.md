@@ -64,6 +64,11 @@ Generates lyrics with varying temperatures for a better distribution over "creat
   * Now it generates entire songs!
 
 # TODOs:
-* Improve song generation:
-  * Accumulate gradients to avoid out of memory issue?
-* upload to server to host a website for making such predictions
+* Could accumulate gradients to avoid out of memory errors, so we can have batch size > 1?
+* Figure out a way to maintain the original prompt much more in our generations
+  * force_tokens_ids in the generate function? In huggingface docs but not in code :(
+* Figure out a way to punish longer *line* generation without impact the length of song generation
+  * Could add like a *NEWLINE* token at the end of each line so it learns what lines are?
+* Upload to server to host a website for making such predictions
+* Set up server to run a Python file to make text predictions (ts/js)
+  * Create main file with CLI methods to generate songs to interface with this better?
