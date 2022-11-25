@@ -39,6 +39,10 @@ customizability for your model's training!
 Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
 Generates lyrics with varying temperatures for a better distribution over "creative" and "safe" song generation.
 
+# main.py
+Main python function used to generate texts when called via js for an API config. Command line interface to interact
+with SwiftAI found here as well!
+
 # ERRORS and FIXES
 * Train loop: model.forward() input cannot be a Tensor
   * Had to convert input and labels to Long datatype before passing into model.forward()
@@ -69,6 +73,7 @@ Generates lyrics with varying temperatures for a better distribution over "creat
   * force_tokens_ids in the generate function? In huggingface docs but not in code :(
 * Figure out a way to punish longer *line* generation without impact the length of song generation
   * Could add like a *NEWLINE* token at the end of each line so it learns what lines are?
-* Upload to server to host a website for making such predictions
+* Add checks to avoid errors in the API, like temp going <0 if there's a lot of songs to generate
 * Set up server to run a Python file to make text predictions (ts/js)
   * Create main file with CLI methods to generate songs to interface with this better?
+  * Use Express to call Python and return it to an endpoint
