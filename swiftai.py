@@ -51,10 +51,3 @@ class SwiftAI:
                                            temperature=i / 10, no_repeat_ngram_size=ngram_block)
         return [self.tokenizer.decode(output, skip_special_tokens=True)
                 for output in outputs]
-
-
-if __name__ == "__main__":
-    swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
-    for song in swift.write_song("Millie is so beautiful, Millie is so kind, Millie likes to sniff my socks"):
-        print(song)
-        input()
