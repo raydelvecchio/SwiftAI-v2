@@ -40,7 +40,7 @@ Contains the SwiftAI class! This class imports the model and then uses it to mak
 Generates lyrics with varying temperatures for a better distribution over "creative" and "safe" song generation.
 
 # main.py
-Main python function used to generate texts when called via js for an API config. Command line interface to interact
+Main python function used to generate texts when called. Command line interface to interact
 with SwiftAI found here as well!
 
 # ERRORS and FIXES
@@ -74,6 +74,4 @@ with SwiftAI found here as well!
 * Figure out a way to punish longer *line* generation without impact the length of song generation
   * Could add like a *NEWLINE* token at the end of each line so it learns what lines are?
 * Add checks to avoid errors in the API, like temp going <0 if there's a lot of songs to generate
-* Set up server to run a Python file to make text predictions (ts/js)
-  * Create main file with CLI methods to generate songs to interface with this better?
-  * Use Express to call Python and return it to an endpoint
+* Set up flask API to return generated songs!

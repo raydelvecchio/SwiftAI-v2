@@ -12,9 +12,7 @@ class SwiftAI:
         :param use_gpu: makes predictions using GPU if true, makes predictions using CPU if false
         """
         if load_not_train:
-            print("Loading model from path...")
             self.model = torch.load(load_path)
-            print("Model loaded!\n")
         else:
             trainer = SwiftAITrainer()
             self.model = trainer.train(save_model_end=False)
@@ -45,7 +43,7 @@ class SwiftAI:
         # force_tokens = starting_tokens.tolist()  # we want to retain context here, so force model to generate them
 
         outputs = []
-        max, end, inc = int(max_temp * 10), int((max_temp - (0.1 * (num_ret + 1))) * 10), int(-0.1 * 10)
+        max, end, inc = int(max_temp * 10), int((max_temp - (0.1 * num_ret)) * 10), int(-0.1 * 10)
         for i in range(max, end, inc):
             outputs += self.model.generate(starting_tokens, do_sample=True, top_k=k, top_p=p, max_length=length,
                                            temperature=i / 10, no_repeat_ngram_size=ngram_block)

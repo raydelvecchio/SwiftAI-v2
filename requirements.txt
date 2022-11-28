@@ -2,3 +2,5 @@ lyricsgenius~=3.0.1
 transformers
 matplotlib
 argparse
+torch
+flask
