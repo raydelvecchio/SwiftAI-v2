@@ -39,9 +39,13 @@ customizability for your model's training!
 Contains the SwiftAI class! This class imports the model and then uses it to make predictions on new song lyrics.
 Generates lyrics with varying temperatures for a better distribution over "creative" and "safe" song generation.
 
-# main.py
+# cli.py
 Main python function used to generate texts when called. Command line interface to interact
 with SwiftAI found here as well!
+
+# api.py
+Flask API backend that calls SwiftAI given an HTTP GET request with parameters and returns a JSON object with the
+songs generated with those parameters!
 
 # ERRORS and FIXES
 * Train loop: model.forward() input cannot be a Tensor
@@ -74,4 +78,5 @@ with SwiftAI found here as well!
 * Figure out a way to punish longer *line* generation without impact the length of song generation
   * Could add like a *NEWLINE* token at the end of each line so it learns what lines are?
 * Add checks to avoid errors in the API, like temp going <0 if there's a lot of songs to generate
-* Set up flask API to return generated songs!
+* Deploy Flask API to the web somehow
+  * Cloud foundry?
