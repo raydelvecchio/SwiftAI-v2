@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from swiftai import SwiftAI
 
 app = Flask("SwiftAI")
-swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
+swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth', use_gpu=False)  # server may not have GPU; takes longer
 
 
 @app.route('/songwrite', methods=['GET'])
