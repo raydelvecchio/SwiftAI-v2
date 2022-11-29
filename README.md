@@ -80,3 +80,4 @@ songs generated with those parameters!
 * Add checks to avoid errors in the API, like temp going <0 if there's a lot of songs to generate
 * Deploy Flask API to the web somehow
   * Cloud foundry?
+* Frontend to take in arguments and call API to display songs!
