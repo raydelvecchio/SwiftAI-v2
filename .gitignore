@@ -1,1 +1,3 @@
-saved_vars
+saved_vars/untrained_swiftai_model.pth
+saved_vars/untrained_swiftai_weights.pth
+saved_vars/trained_swiftai_songs_weights.pth
