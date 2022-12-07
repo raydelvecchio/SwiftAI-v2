@@ -1,8 +1,17 @@
 from flask import Flask, jsonify, request
 from swiftai import SwiftAI
+from constants import PORT
 
 app = Flask("SwiftAI")
 swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth', use_gpu=False)  # server may not have GPU; takes longer
+
+
+@app.route('/')
+def heartbeat():
+    """
+    Homepage to easily check if our API is running correctly.
+    """
+    return "SwiftAI API Live!"
 
 
 @app.route('/songwrite', methods=['GET'])
@@ -24,4 +33,4 @@ def generate_song():
     return jsonify(written_songs), 200
 
 
-app.run()
+app.run(port=PORT)

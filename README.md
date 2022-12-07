@@ -14,6 +14,8 @@ first version, listed here:
 This codebase, specifically when training the model, requires CUDA (and Pytorch CUDA). You can check your CUDA version
 with `nvcc --version`. You can then check how to install Pytorch CUDA [here](https://pytorch.org/get-started/locally/). I 
 used the following command: `pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu117`.
+On linux, I used `pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu`. To upload and download
+weights to GitHub, you must use `git-lfs` to push/pull.
 
 # constants.py
 File containing all constants necessary to train the model. Genius secrets/tokens stored as environment variables.
@@ -47,6 +49,9 @@ with SwiftAI found here as well!
 Flask API backend that calls SwiftAI given an HTTP GET request with parameters and returns a JSON object with the
 songs generated with those parameters!
 
+# Deployment
+SwiftAI deployed on AWS with this [guide](https://www.twilio.com/blog/deploy-flask-python-app-aws).
+
 # ERRORS and FIXES
 * Train loop: model.forward() input cannot be a Tensor
   * Had to convert input and labels to Long datatype before passing into model.forward()
@@ -70,6 +75,8 @@ songs generated with those parameters!
 * Bad text generation produces a ton of <|EOS|> tokens and short songs (when trained on songs)
   * Fixed by only appending <|EOS|> before and after an entire SONG, rather than before and after each LINE
   * Now it generates entire songs!
+* On cloning code to Linux machine: `_pickle.UnpicklingError: invalid load key, 'v'`
+  * Needed to download weights with git-lfs, not just regular git!
 
 # TODOs:
 * Could accumulate gradients to avoid out of memory errors, so we can have batch size > 1?
@@ -78,6 +85,5 @@ songs generated with those parameters!
 * Figure out a way to punish longer *line* generation without impact the length of song generation
   * Could add like a *NEWLINE* token at the end of each line so it learns what lines are?
 * Add checks to avoid errors in the API, like temp going <0 if there's a lot of songs to generate
-* Deploy Flask API to the web somehow
-  * Cloud foundry?
+* Deploy Flask API to the web via AWS
 * Frontend to take in arguments and call API to display songs!

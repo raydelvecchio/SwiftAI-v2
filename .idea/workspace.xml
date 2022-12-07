@@ -3,7 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="568c9f19-58a7-48ff-ae8b-fb0f4f55eb9d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/swiftai.py" beforeDir="false" afterPath="$PROJECT_DIR$/swiftai.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,6 +147,7 @@
       <option name="presentableId" value="Default" />
       <updated>1669010041798</updated>
       <workItem from="1669414281259" duration="1917000" />
+      <workItem from="1670016873307" duration="311000" />
     </task>
     <servers />
   </component>

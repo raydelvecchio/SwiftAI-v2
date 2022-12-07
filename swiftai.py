@@ -12,7 +12,10 @@ class SwiftAI:
         :param use_gpu: makes predictions using GPU if true, makes predictions using CPU if false
         """
         if load_not_train:
-            self.model = torch.load(load_path)
+            if use_gpu:
+                self.model = torch.load(load_path)
+            else:
+                self.model = torch.load(load_path, map_location=torch.device('cpu'))
         else:
             trainer = SwiftAITrainer()
             self.model = trainer.train(save_model_end=False)
