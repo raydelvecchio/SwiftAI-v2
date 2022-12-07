@@ -9,6 +9,7 @@ parser.add_argument('-p', '--prompt', help='Prompt to kickstart generation of so
 parser.add_argument('-l', '--length', help='Length of songs')
 parser.add_argument('-r', '--return', help='Number of songs to return from SwiftAI')
 parser.add_argument('-t', '--temperature', help="Default starting temperature of song; each new song decreases temp")
+parser.add_argument('-c', '--cpu', help="If we should use CPU or not; 1 means use CPU, 0 means use GPU.")
 
 args = parser.parse_args()
 
@@ -17,7 +18,15 @@ prompt = getattr(args, 'prompt') if getattr(args, 'prompt') is not None else "<|
 length = getattr(args, 'length') if getattr(args, 'length') is not None else 300
 num_ret = getattr(args, 'return') if getattr(args, 'return') is not None else 3
 temp = getattr(args, 'temperature') if getattr(args, 'temperature') is not None else 1.5
+cpu = getattr(args, 'cpu') if getattr(args, 'cpu') is not None else 1  # default is using CPU
 
-swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth', use_gpu=False)
+use = False
+if cpu == 1:
+    use = False
+elif cpu == 0:
+    use = True
+
+
+swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth', use_gpu=use)
 for song in swift.write_song(prompt, length=length, num_ret=num_ret, max_temp=temp):
     print("\n" + song + "\n")
