@@ -18,6 +18,6 @@ length = getattr(args, 'length') if getattr(args, 'length') is not None else 300
 num_ret = getattr(args, 'return') if getattr(args, 'return') is not None else 3
 temp = getattr(args, 'temperature') if getattr(args, 'temperature') is not None else 1.5
 
-swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth')
+swift = SwiftAI('saved_vars/trained_swiftai_songs_model.pth', use_gpu=False)
 for song in swift.write_song(prompt, length=length, num_ret=num_ret, max_temp=temp):
     print("\n" + song + "\n")
